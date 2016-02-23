@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import readline
 import sys
 import os
@@ -5,39 +7,57 @@ import os
 # Global readline instructions
 readline.parse_and_bind('tab: complete')
 
-
 # Handles exit
-def cmdExit():
+def cmdExit(args=None):
     return -1
 
 # Handles pwd
-def cmdPwd():
+def cmdPwd(args=None):
     sys.stdout.write(os.getcwd())
     return 1
 
+def cmdCd(args):
+    os.chdir(args[1])
+    sys.stdout.write(os.getcwd())
+    return 1
+
+def cmdOutsource(args):
+    os.system('/usr/bin/'+args[0]+' '+args[1])
+    return 1
+
+#-------------------------------------------------------------------
 global_cmd_dict = {
         'exit': cmdExit,
-        'pwd': cmdPwd
+        'pwd': cmdPwd,
+        'cd': cmdCd
         }
 
-global_cmd = ['exit', 'pwd']
+global_cmd_outSource = ['vi', 'vim', 'ssh']
+
 def cmd_split_line(line):
     list_args = line.split( )
     return list_args
 
 def cmd_exec(args):
+    status = 0
     for w in args:
-        if w in global_cmd:
-            print w
-            status = global_cmd_dict[w]()
+        if w in global_cmd_dict.keys():
+            status = global_cmd_dict[w](args)
+            break
+        if w in global_cmd_outSource:
+            status = cmdOutsource(args)
+            break
+    if status==0:
+        sys.stdout.write("anirudt-shell: command not found: "+args[0])
+        return 100
     return status
 
 
 def cmd_loop():
     line, args, status = "", "", 1
     i = 0
-    prompt = "$ "
     while status > 0:
+        prompt = os.getcwd()+"$ "
         line = raw_input(prompt)
         args = cmd_split_line(line)
         status = cmd_exec(args)
