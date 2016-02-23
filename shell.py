@@ -6,9 +6,11 @@ import os
 readline.parse_and_bind('tab: complete')
 
 
+# Handles exit
 def cmdExit():
     return -1
 
+# Handles pwd
 def cmdPwd():
     sys.stdout.write(os.getcwd())
     return 1
@@ -34,9 +36,9 @@ def cmd_exec(args):
 def cmd_loop():
     line, args, status = "", "", 1
     i = 0
+    prompt = "$ "
     while status > 0:
-        sys.stdout.write('$ ')
-        line = raw_input()
+        line = raw_input(prompt)
         args = cmd_split_line(line)
         status = cmd_exec(args)
 
