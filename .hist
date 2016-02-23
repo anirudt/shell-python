@@ -1,1 +1,3 @@
-cat shell.py
+cd ../
+cd ../
+ls

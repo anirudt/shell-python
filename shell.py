@@ -6,8 +6,8 @@ import os
 
 # Global readline instructions
 readline.parse_and_bind('tab: complete')
+f = open(os.getcwd()+'/.hist', 'ab')
 readline.read_history_file(os.getcwd() + '/.hist')
-readline.write_history_file(os.getcwd() + '/.hist')
 
 # Handles exit
 def cmdExit(args=None):
@@ -19,8 +19,10 @@ def cmdPwd(args=None):
     return 1
 
 def cmdCd(args):
+    global f
+    f.close()
     os.chdir(args[1])
-    readline.write_history_file(os.getcwd() + '/.hist')
+    f = open(os.getcwd()+'/.hist', 'ab')
     readline.read_history_file(os.getcwd() + '/.hist')
     sys.stdout.write(os.getcwd())
     return 1
@@ -64,8 +66,10 @@ def cmd_loop():
         prompt = os.getcwd()+"$ "
         line = raw_input(prompt)
         args = cmd_split_line(line)
-        status = cmd_exec(args)
+        if status == 1:
+            f.write(line+'\n')
 
+        status = cmd_exec(args)
         line, args = "", ""
         sys.stdout.write('\n')
 

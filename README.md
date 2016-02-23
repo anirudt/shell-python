@@ -1,6 +1,9 @@
 ## What?
 This is an experimental shell implemented in Python.
 
+## Features
+- Added directory wise history mapping [in process]
+
 ## Utilities
 ```
 cd
