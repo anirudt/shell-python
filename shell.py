@@ -4,11 +4,28 @@ import readline
 import sys
 import os
 import pdb
+from termcolor import colored
+import getpass
 
 # Global readline instructions
 readline.parse_and_bind('tab: complete')
 f = open(os.getcwd()+'/.hist', 'ab')
 readline.read_history_file(os.getcwd() + '/.hist')
+
+username = getpass.getuser()
+f = os.popen('ifconfig eth0 | grep "inet\ addr" | cut -d: -f2 | cut -d" " -f1')
+ipaddr = f.read().rstrip()
+
+def prompt_decor():
+    f = os.popen('acpi | grep -oP "\d+(?=%)"')
+    charge = f.read().rstrip()
+    pwd = os.getcwd()
+
+    prompt_string = colored(username, 'cyan') + " at " + colored(ipaddr, 'green') + \
+                    ", " + charge +"% in " + pwd
+    return prompt_string
+    
+
 
 # Handles exit
 def cmdExit(args=None):
@@ -29,15 +46,14 @@ def cmdCd(args):
     return 1
 
 def cmdOutsource(args):
-    files_bin = os.listdir('/bin')#[f for f in os.listdir('/bin/') if os.path.isfile(f)]
-    files_usr_bin = os.listdir('/usr/bin')#[f for f in os.listdir('/usr/bin/') if os.path.isfile(f)]
+    files_bin = os.listdir('/bin')
+    files_usr_bin = os.listdir('/usr/bin')
     #pdb.set_trace()
     if args[0] in files_bin:
-        os.system('/bin/'+args[0]+' '+args[1])
-        print "Hi"
+        os.system('/bin/'+' '.join(args))
         return 1
     if args[0] in files_usr_bin:
-        os.system('/usr/bin/'+args[0]+' '+args[1])
+        os.system('/usr/bin/'+' '.join(args))
         return 1
     else:
         return 0
@@ -75,8 +91,9 @@ def cmd_exec(args):
 def cmd_loop():
     line, args, status = "", "", 1
     i = 0
+    os.chdir('/home/anirudt')
     while status > 0:
-        prompt = os.getcwd()+"$ "
+        prompt = prompt_decor() + "\n" + "$ "
         line = raw_input(prompt)
         args = cmd_split_line(line)
         if status == 1:
