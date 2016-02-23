@@ -3,6 +3,7 @@
 import readline
 import sys
 import os
+import pdb
 
 # Global readline instructions
 readline.parse_and_bind('tab: complete')
@@ -28,8 +29,18 @@ def cmdCd(args):
     return 1
 
 def cmdOutsource(args):
-    os.system('/usr/bin/'+args[0]+' '+args[1])
-    return 1
+    files_bin = os.listdir('/bin')#[f for f in os.listdir('/bin/') if os.path.isfile(f)]
+    files_usr_bin = os.listdir('/usr/bin')#[f for f in os.listdir('/usr/bin/') if os.path.isfile(f)]
+    #pdb.set_trace()
+    if args[0] in files_bin:
+        os.system('/bin/'+args[0]+' '+args[1])
+        print "Hi"
+        return 1
+    if args[0] in files_usr_bin:
+        os.system('/usr/bin/'+args[0]+' '+args[1])
+        return 1
+    else:
+        return 0
 
 #-------------------------------------------------------------------
 global_cmd_dict = {
@@ -45,14 +56,16 @@ def cmd_split_line(line):
     return list_args
 
 def cmd_exec(args):
+    #pdb.set_trace()
     status = 0
     for w in args:
         if w in global_cmd_dict.keys():
             status = global_cmd_dict[w](args)
             break
-        if w in global_cmd_outSource:
+        else:
             status = cmdOutsource(args)
-            break
+            if status == 1:
+                break
     if status==0:
         sys.stdout.write("anirudt-shell: command not found: "+args[0])
         return 100
