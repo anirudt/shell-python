@@ -9,7 +9,7 @@ import getpass
 
 # Global readline instructions
 readline.parse_and_bind('tab: complete')
-f = open(os.getcwd()+'/.hist', 'ab')
+hist = open(os.getcwd()+'/.hist', 'ab')
 readline.read_history_file(os.getcwd() + '/.hist')
 
 username = getpass.getuser()
@@ -20,10 +20,21 @@ def prompt_decor():
     f = os.popen('acpi | grep -oP "\d+(?=%)"')
     charge = f.read().rstrip()
     pwd = os.getcwd()
+    git = True if '.git' in os.listdir(pwd) else False
+    if git:
+        f = os.popen('git status --porcelain')
+        if f is None:
+            gitstr = colored('o', 'green')
+        else:
+            gitstr = colored('x', 'red')
+        prompt_string = "$ "+ colored(username, 'cyan') + " at " + colored(ipaddr, 'green') + \
+                ", " + colored(charge, 'green') +"% in " + colored(pwd, 'yellow') + " on git: " + gitstr
 
-    prompt_string = colored(username, 'cyan') + " at " + colored(ipaddr, 'green') + \
-                    ", " + charge +"% in " + pwd
-    return prompt_string
+        return prompt_string
+    else:
+        prompt_string = "$ "+ colored(username, 'cyan') + " at " + colored(ipaddr, 'green') + \
+                ", " + colored(charge, 'green') +"% in " + colored(pwd, 'yellow')
+        return prompt_string
     
 
 
@@ -37,10 +48,10 @@ def cmdPwd(args=None):
     return 1
 
 def cmdCd(args):
-    global f
-    f.close()
+    global hist
+    hist.close()
     os.chdir(args[1])
-    f = open(os.getcwd()+'/.hist', 'ab')
+    hist = open(os.getcwd()+'/.hist', 'ab')
     readline.read_history_file(os.getcwd() + '/.hist')
     sys.stdout.write(os.getcwd())
     return 1
@@ -97,7 +108,7 @@ def cmd_loop():
         line = raw_input(prompt)
         args = cmd_split_line(line)
         if status == 1:
-            f.write(line+'\n')
+            hist.write(line+'\n')
 
         status = cmd_exec(args)
         line, args = "", ""
